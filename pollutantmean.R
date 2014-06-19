@@ -22,5 +22,5 @@ pollutantmean <- function(directory, pollutant, id = 1:332) {
   
   vects <- sapply(id, getMean)
   vect <- unlist(vects)
-  round(mean(vect), 3)
+  mean(vect)
 }
