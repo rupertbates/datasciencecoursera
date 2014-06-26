@@ -1,26 +1,29 @@
 best <- function(state, outcome) {
   ## Read outcome data
+  data <- read.csv("outcome-of-care-measures.csv", colClasses = "character")
   ## Check that state and outcome are valid
+  if(! state %in% data$State)
+    stop("invalid state")
+  
+  colName <- getColName(outcome)
+  if(!colName %in% colnames(data))
+    stop("invalid outcome")
+  
   ## Return hospital name in that state with lowest 30-day death
   ## rate
   
-  outcome <- getColName(outcome)
-  state <- getStateRows(state)
-  state[, outcome] <- as.numeric(state[, outcome])
-  sorted <- sort(state, outcome)
-  sorted
+  sorted <- getSortedState(data, state, colName)
+  sorted$Hospital.Name[1]
 }
 
-getSortedState <- function(state, outcome){
-  colName <- getColName(outcome)
-  stateRows <- getStateRows(state)
+getSortedState <- function(data, state, colName){
+  stateRows <- getStateRows(data, state)
   stateRows[, colName] <- as.numeric(stateRows[, colName])
   sort(stateRows, colName)
 }
 
-getStateRows <- function(state) {
+getStateRows <- function(data, state) {
   ## Return rows for a particular state
-  data <- read.csv("outcome-of-care-measures.csv", colClasses = "character")
   data[data$State == state,]
 }
 
