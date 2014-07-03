@@ -18,7 +18,7 @@ best <- function(state, outcome) {
 
 getSortedState <- function(data, state, colName){
   stateRows <- getStateRows(data, state)
-  stateRows[, colName] <- as.numeric(stateRows[, colName])
+  stateRows[, colName] <- suppressWarnings(as.numeric(stateRows[, colName]))
   sort(stateRows, colName)
 }
 
