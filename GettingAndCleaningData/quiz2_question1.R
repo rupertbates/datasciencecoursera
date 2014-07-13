@@ -22,7 +22,10 @@ stop_for_status(req)
 cont <- content(req)
 sapply(cont, function(el){el$name})
 
+
 # OR:
 req <- with_config(gtoken, GET("https://api.github.com/rate_limit"))
 stop_for_status(req)
 content(req)
+
+sapply(cont, function(el){print(paste(el$name, el$created_at, sep=" "))})
