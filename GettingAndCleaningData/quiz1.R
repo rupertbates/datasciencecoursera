@@ -42,5 +42,18 @@ dataUrl <- "https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2Fss06pid.csv"
 dataFile <- "./data/community-survey-2006.csv"
 download.file(dataUrl, destfile=dataFile, method="curl")
 list.files("./data")
+DT <- fread(dataFile)
 
-
+timeFunction <- function(fun){
+  time = 0
+  for(i in 1:300){
+    time = time + system.time(fun())
+  }
+  time
+}
+timeFunction(function(){sapply(split(DT$pwgtp15,DT$SEX),mean)})
+# wrong - system.time(mean(DT$pwgtp15,by=DT$SEX)) 
+timeFunction(function(){mean(DT[DT$SEX==1,]$pwgtp15); mean(DT[DT$SEX==2,]$pwgtp15)})
+# wrong - system.time(rowMeans(DT)[DT$SEX==1]; rowMeans(DT)[DT$SEX==2])
+timeFunction(function(){tapply(DT$pwgtp15,DT$SEX,mean)})
+timeFunction(function(){DT[,mean(pwgtp15),by=SEX]})
