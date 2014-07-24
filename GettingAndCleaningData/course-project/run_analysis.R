@@ -16,7 +16,7 @@ regex <- "^.*mean().*|^.*std().*"
 meanStdCols <- grep(regex, featureNames, value=TRUE)
 
 # The list of columns in the tidied dataframe
-colNames <- c(c("subject", "activity"), meanStdCols)
+colNames <- c(c("subject", "activity"), gsub(meanStdCols, pattern="\\(|\\)|-",replacement="."))
 
 
 loadAndTidyDataset <- function(x){
@@ -47,6 +47,17 @@ train <- loadAndTidyDataset("train")
 # Merge the datasets
 merged <- rbind(test, train)
 
+# require(reshape2)
+# df_melt <- melt(df1, id = c("date", "year", "month"))
+# dcast(df_melt, year + month ~ variable, sum)
+# #  year month         x1           x2
+# 1  2000     1  -80.83405 -224.9540159
+# 2  2000     2 -223.76331 -288.2418017
+# 3  2000     3 -188.83930 -481.5601913
+# 4  2000     4 -197.47797 -473.7137420
+# 5  2000     5 -259.07928 -372.4563522
+
+summed <-aggregate(merged$tBodyAcc.mean...X merged$tBodyAcc.mean...Y ~ merged$subject + merged$activity, col.names=c("a","b","c"), FUN=mean, na.rm=TRUE)
 
 
 
