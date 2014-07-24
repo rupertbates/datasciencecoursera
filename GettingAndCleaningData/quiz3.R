@@ -10,6 +10,11 @@ which(data$agricultureLogical)
 
 
 #Question 2
+# Using the jpeg package read in the following picture of your instructor into R 
+# Use the parameter native=TRUE. What are the 30th and 80th quantiles of the resulting data? (some Linux systems may produce an answer 638 different for the 30th quantile)
+library(jpeg)
+jpg <- readJPEG("./data/getdata-jeff.jpg", native=TRUE)
+quantile(jpg, probs=c(0.3, 0.8))
 
 
 #Question 3
@@ -50,3 +55,5 @@ merged$rankingGroup = cut2(merged$GdpRanking, g=5)
 
 tab <- table(merged$Income.Group, merged$rankingGroup)
 tab[5,1]
+
+
