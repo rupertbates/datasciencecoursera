@@ -29,26 +29,24 @@ loadAndTidyDataset <- function(x){
   # Add the subject and activity into the dataset
   subject <- read.table(paste0("./course-project//UCI HAR Dataset/", x, "/subject_", x, ".txt"), col.names=c("subject"))
   activity <- read.table(paste0("./course-project/UCI HAR Dataset/", x, "/y_", x, ".txt"), col.names=c("activityId"))
-  activityMerged <- merge(activityNames, activity, all.y=TRUE)
-  dataWithSubject <- data.frame(subject, activityMerged$activity, data)
+  
+  sAndA <- data.frame(subject, activity)
+  sAndAMerged <- merge(x=sAndA, y=activityNames, by="activityId")
+  
+  data <- data.frame(sAndAMerged$subject, sAndAMerged$activity, data)
   
   # Add descriptive names to the columns
-  names(dataWithSubject) <- colNames
-  dataWithSubject 
+  names(data) <- colNames
+  data 
 }
 
 
 test <- loadAndTidyDataset("test")
 train <- loadAndTidyDataset("train")
 
-
-
 # Merge the datasets
 merged <- rbind(test, train)
 
-# Extract only mean and standard deviation measurements
-regex <- "^.*mean().*|^.*std().*"
-reduced <- merged[grep(regex, names(merged), value=TRUE)]
 
 
 
