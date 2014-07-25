@@ -16,7 +16,7 @@ regex <- "^.*mean().*|^.*std().*"
 meanStdCols <- grep(regex, featureNames, value=TRUE)
 
 # The list of columns in the tidied dataframe
-colNames <- c(c("subject", "activity"), gsub(meanStdCols, pattern="\\(|\\)|-",replacement="."))
+colNames <- c(c("subject", "activity"), gsub(gsub(meanStdCols, pattern="-", replacement="."), pattern="\\(|\\)", replacement=""))
 
 
 loadAndTidyDataset <- function(x){
