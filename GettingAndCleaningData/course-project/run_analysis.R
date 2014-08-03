@@ -7,9 +7,9 @@
 
 
 #Load in the lists of features and activities
-features <- read.table("./course-project/UCI HAR Dataset/features.txt", stringsAsFactors=FALSE)
+features <- read.table("./UCI HAR Dataset/features.txt", stringsAsFactors=FALSE)
 featureNames <- features[,2]
-activityNames <- read.table("./course-project/UCI HAR Dataset/activity_labels.txt", col.names=c("activityId", "activity"))
+activityNames <- read.table("./UCI HAR Dataset/activity_labels.txt", col.names=c("activityId", "activity"))
 
 # Get a full list of names for the measurement columns and also a list of columns which contain mean and standard deviation measurements
 regex <- "^.*mean().*|^.*std().*"
@@ -21,14 +21,14 @@ colNames <- c(c("subject", "activity"), gsub(gsub(meanStdCols, pattern="-", repl
 
 loadAndTidyDataset <- function(x){
   # Load the full data set
-  data <- read.table(paste0("./course-project/UCI HAR Dataset/", x, "/X_", x, ".txt"), col.names=featureNames)
+  data <- read.table(paste0("./UCI HAR Dataset/", x, "/X_", x, ".txt"), col.names=featureNames)
   
   # Reduce the data frame to just those columns containing mean and standard deviation measurements
   data <- data[grep(regex, names(data), value=TRUE)]
   
   # Add the subject and activity into the dataset
-  subject <- read.table(paste0("./course-project//UCI HAR Dataset/", x, "/subject_", x, ".txt"), col.names=c("subject"))
-  activity <- read.table(paste0("./course-project/UCI HAR Dataset/", x, "/y_", x, ".txt"), col.names=c("activityId"))
+  subject <- read.table(paste0("./UCI HAR Dataset/", x, "/subject_", x, ".txt"), col.names=c("subject"))
+  activity <- read.table(paste0("./UCI HAR Dataset/", x, "/y_", x, ".txt"), col.names=c("activityId"))
   
   sAndA <- data.frame(subject, activity)
   sAndAMerged <- merge(x=sAndA, y=activityNames, by="activityId")
@@ -52,6 +52,8 @@ library(reshape2)
 
 df_melt <- melt(merged, id = c("subject", "activity"))
 df_cast <- dcast(df_melt, subject + activity ~ ..., mean)
+
+write.table(df_cast, file="./tidy-dataset.txt")
 
 #summed <-aggregate(merged$tBodyAcc.mean...X ~ merged$subject + merged$activity, FUN=mean, na.rm=TRUE)
 
