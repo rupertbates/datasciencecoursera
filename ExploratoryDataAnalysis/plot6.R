@@ -14,53 +14,34 @@ SCC <- readRDS("Source_Classification_Code.rds")
 #Get the codes pertaining to motor vehicles
 trafficCodes <- SCC[grep("Mobile - .*Vehicles", SCC$EI.Sector), c("SCC", "EI.Sector")]
 
-#Get Baltimore data
-baltimore <- NEI[NEI$fips=="24510", ]
+getDataSet <- function(fips, title){
+  #Get data for the given city
+  ds <- NEI[NEI$fips==fips, ]
+  
+  #Filter to motor vehicle data only
+  dsTraffic <- ds[ds$SCC %in% trafficCodes$SCC, ]
+  
+  #Add some columns to help with plotting
+  dsTraffic$YearFactor <- as.factor(dsTraffic$year)
+  dsTraffic$City <- title 
+  
+  #Melt & reshape the dataset
+  dsMelt <- melt(dsTraffic, measure.vars=c("Emissions"))
+  dsAll <- dcast(dsMelt, YearFactor + City ~ variable, sum)
+  #Work out the year on year change
+  dsAll <- transform(dsAll, Change = Emissions - Emissions[1])
+}
 
-#Motor vehicle data in baltimore
-baltimoreTraffic <- baltimore[baltimore$SCC %in% trafficCodes$SCC, ]
+#Get data for each of the cities
+baltimore <- getDataSet("24510", "Baltimore") 
+la <- getDataSet("06037", "Los Angeles County")
 
-#Melt & reshape the dataset
-df_melt <- melt(baltimoreTraffic, measure.vars=c("Emissions"))
-df_cast <- dcast(df_melt, YearFactor + EI.Sector + fips ~ variable, sum)
-df_all <- dcast(df_melt, YearFactor + fips ~ variable, sum)
-df_all$EI.Sector <- rep("All motor vehicle sources", times=length(unique(df_cast$YearFactor)))
+dsBoth <- rbind(baltimore, la)
 
-
-
-#Plot
-df_plot <- rbind(df_cast, df_all)
-df_all <- transform(df_all[df_all$fips=="Baltimore",], change = 100*(Emissions/Emissions[1] - 1))
-
-
-#Get comparison data
-compare <- NEI[NEI$fips %in% c("24510", "06037"), ]
-compare$fips[compare$fips == "24510"] <- "Baltimore"
-compare$fips[compare$fips == "06037"] <- "Los Angeles County"
-
-#Motor vehicle data in the two cities
-fromTraffic <- compare[compare$SCC %in% trafficCodes$SCC, ]
-
-#Merge the codes with the main data set
-merged <- merge(trafficCodes, fromTraffic, by.x="SCC", by.y="SCC")
-merged$YearFactor <- as.factor(merged$year)
-
-#Melt & reshape the dataset
-df_melt <- melt(merged, measure.vars=c("Emissions"))
-df_cast <- dcast(df_melt, YearFactor + EI.Sector + fips ~ variable, sum)
-df_all <- dcast(df_melt, YearFactor + fips ~ variable, sum)
-df_all$EI.Sector <- rep("All motor vehicle sources", times=length(unique(df_cast$YearFactor)))
-
-
-
-#Plot
-df_plot <- rbind(df_cast, df_all)
-df_all <- transform(df_all[df_all$fips=="Baltimore",], change = 100*(Emissions/Emissions[1] - 1))
-
-ggplot(df_plot, aes(YearFactor, Emissions)) +  
+#plot
+ggplot(dsBoth, aes(YearFactor, Change)) +  
   geom_point() +
-  geom_line(aes(group=EI.Sector, color=EI.Sector)) +
-  facet_grid(. ~ fips) +
-  labs(x="Year", title="Motor vehicle emissions in Baltimore & Los Angeles County")
+  geom_line(aes(group=City, color=City)) +
+  labs(x="Year", title="Changes in vehicle emissions in Baltimore & Los Angeles County")
 
-ggsave(filename="plot5.png", dpi=72)
+ggsave(filename="plot6.png", dpi=72)
